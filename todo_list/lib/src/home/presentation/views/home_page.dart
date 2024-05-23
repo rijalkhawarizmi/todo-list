@@ -9,15 +9,16 @@ import 'package:todo_list/common/widgets/text_button.dart';
 import 'package:todo_list/common/widgets/custom_text.dart';
 import 'package:todo_list/core/utils/shared_storage.dart';
 import 'package:todo_list/src/authentication/presentation/views/login_page.dart';
-import 'package:todo_list/src/home/domain/entities/tasks_entity.dart';
-import 'package:todo_list/src/home/domain/usecases/update_tasks.dart';
-import 'package:todo_list/src/home/presentation/cubit/delete_tasks/delete_tasks_cubit.dart';
 import 'package:todo_list/src/home/presentation/views/add_update_tasks_page.dart';
-import 'package:todo_list/src/home/presentation/widgets/card_widget.dart';
+import 'package:todo_list/src/home/presentation/widgets/card_metadata.dart';
 import 'package:todo_list/src/home/presentation/widgets/shimmer_loading.dart';
-import '../../../../common/widgets/alert_widget.dart';
+import 'package:todo_list/src/home/presentation/widgets/task_card.dart';
 import '../../../../core/style/color_app.dart';
-import '../cubit/get_tasks/get_tasks_cubit.dart'; // Update this to your actual import
+import '../cubit/get_tasks/get_tasks_cubit.dart';
+import '../widgets/card_assignmnet.dart';
+import '../widgets/card_board.dart';
+import '../widgets/card_child.dart';
+import '../widgets/card_pivot.dart'; // Update this to your actual import
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -43,17 +44,22 @@ class _HomePageState extends State<HomePage> {
           context.pushNamed(AddUpdateTasksPage.addTasksRoute);
         },
         child: const CustomTextNunito(
-            text: "ADD",
+             textAlign: TextAlign.center,
+            text: "ADD TASK",
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: ColorApp.black),
       ),
-      appBar: AppBar(actions: [
-        IconButton(onPressed: (){
-          context.goNamed(LoginPage.loginRoute);
-          SharedStorage.removeAuth();
-        }, icon: const Icon(Icons.logout))
-      ],),
+      appBar: AppBar(
+        actions: [
+          IconButton(
+              onPressed: () {
+                context.goNamed(LoginPage.loginRoute);
+                SharedStorage.removeAuth();
+              },
+              icon: const Icon(Icons.logout))
+        ],
+      ),
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
@@ -65,171 +71,30 @@ class _HomePageState extends State<HomePage> {
                     showRootNode: false,
                     builder: (context, node) {
                       if (node.data?.isTaskEntity == true) {
-                        final items = node.data!.tasksEntity;
-                        return Card(
-                          child: Column(
-                            children: [
-                              ListTile(
-                                title: Text("${items?.title}"),
-                                leading: BlocConsumer<DeleteTasksCubit,
-                                    DeleteTasksState>(
-                                  listener: (context, state) {
-                                    // TODO: implement listener
-                                    if (state is DeleteTasksLoading) {
-                                      showDialog(
-                                          context: context,
-                                          builder: (c) {
-                                            return AlertWidget(
-                                                title: const CustomTextNunito(
-                                                    textAlign: TextAlign.center,
-                                                    text: "Sedang menghapus",
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: ColorApp.black600));
-                                          });
-                                    } else if (state is DeleteTasksSuccess) {
-                                      context
-                                          .read<GetTasksCubit>()
-                                          .getListTasks();
-                                      context.pop();
-                                      Fluttertoast.showToast(
-                                          msg: state.message,
-                                          backgroundColor:
-                                              Colors.green.shade500);
-                                    } else if (state is DeleteTasksFailed) {
-                                      context.pop();
-                                      Fluttertoast.showToast(
-                                          msg: state.message,
-                                          backgroundColor: ColorApp.red);
-                                    }
-                                  },
-                                  builder: (context, state) {
-                                    return IconButton(
-                                        onPressed: () {
-                                          showDialog(
-                                              context: context,
-                                              builder: (c) {
-                                                return AlertWidget(
-                                                  title: const CustomTextNunito(
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      text:
-                                                          "Anda yakin ingin menghapus tasks ini ?",
-                                                      fontSize: 20,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: ColorApp.black600),
-                                                  actions: [
-                                                    TextButtonWidget(
-                                                        title: "TIDAK",
-                                                        onPress: () {
-                                                          context.pop();
-                                                        }),
-                                                    TextButtonWidget(
-                                                        title: "YA",
-                                                        onPress: () {
-                                                          context
-                                                              .read<
-                                                                  DeleteTasksCubit>()
-                                                              .deleteTasks(
-                                                                  items!.id!);
-                                                          context.pop();
-                                                        })
-                                                  ],
-                                                );
-                                              });
-                                        },
-                                        icon: const Icon(Icons.delete));
-                                  },
-                                ),
-                                trailing: InkWell(
-                                  onTap: () {
-                                    context.pushNamed(
-                                        AddUpdateTasksPage.addTasksRoute,
-                                        extra: UpdateTasksParams(
-                                            id: items!.id!,
-                                            title: items.title ?? "",
-                                            description:
-                                                items.description ?? ""));
-                                  },
-                                  child: const Icon(Icons.edit_calendar),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
+                        return TasksCard(tasksEntity: node.data?.tasksEntity);
                       } else if (node.data!.isAssignmentEntity == true) {
                         for (int i = 0;
                             i < node.data!.assignmentEntity!.length;) {
-                          return CardWidget<List<AssignmentEntity>>(
-                            item: node.data?.assignmentEntity,
-                            itemBuilder: (assignmentEntity) => Column(
-                              children: [
-                                const Text('Assignment'),
-                                ListTile(
-                                  title: Text(
-                                      "Name : ${assignmentEntity?[i].fullName}"),
-                                  subtitle: Text(
-                                      "Role : ${node.data?.assignmentEntity?[i].role}"),
-                                ),
-                              ],
-                            ),
-                          );
+                          return CardAssignment(
+                              assignmentEntity:
+                                  node.data?.assignmentEntity?[i]);
                         }
                       } else if (node.data!.isBoardEntity == true) {
-                        return CardWidget<BoardEntity>(
-                            item: node.data?.boardEntity,
-                            itemBuilder: (board) {
-                              return ListTile(
-                                title: Text("Name : ${board?.name}"),
-                                subtitle: Text(
-                                    'Descriptioon : ${board?.description}'),
-                              );
-                            });
+                        return CardBoard(
+                          boardEntity: node.data?.boardEntity,
+                        );
                       } else if (node.data!.isMetaDataEntity == true) {
-                        return CardWidget<MetadataEntity>(
-                            item: node.data!.metadataEntity,
-                            itemBuilder: (meta) {
-                              return Column(
-                                children: [
-                                  const Text('Metadata'),
-                                  ListTile(
-                                    title: Text("${meta?.bg}"),
-                                    subtitle: Text('${meta?.font}'),
-                                  ),
-                                ],
-                              );
-                            });
+                        return CardMetaData(
+                          metadataEntity: node.data?.metadataEntity,
+                        );
                       } else if (node.data!.isPivotEntity == true) {
-                        return CardWidget<PivotEntity>(
-                            item: node.data!.pivotEntity,
-                            itemBuilder: (pivot) {
-                              return Column(
-                                children: [
-                                  const Text('Pivot'),
-                                  ListTile(
-                                    title: Text("Role : ${pivot?.role}"),
-                                    subtitle: Text('ID : ${pivot?.entityId}'),
-                                  ),
-                                ],
-                              );
-                            });
+                        return CardPivot(
+                          pivotEntity: node.data?.pivotEntity,
+                        );
                       } else if (node.data!.isChildEntity == true) {
                         for (int i = 0; i < node.data!.childEntity!.length;) {
-                          return CardWidget<List<ChildEntity>>(
-                              item: node.data?.childEntity,
-                              itemBuilder: (child) {
-                                return Column(
-                                  children: [
-                                    const Text('Children'),
-                                    ListTile(
-                                      title: Text("Title ${child?[i].title}"),
-                                      subtitle:
-                                          Text('ID ${child?[i].recordStatus}'),
-                                    ),
-                                  ],
-                                );
-                              });
+                          return CardChild(
+                              childEntity: node.data?.childEntity?[i]);
                         }
                       }
                       return const SizedBox.shrink();

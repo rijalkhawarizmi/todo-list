@@ -57,7 +57,7 @@ class HomeRemoteDataSrcImpl implements HomeRemoteDataSource {
       final authModel = await SharedStorage.getAuth();
       Map map = {
         "title": param.title,
-        "description": param.title,
+        "description": param.description,
         "record_type": "TO_DO",
         "recurrence": "DAILY",
         "parent_id": null

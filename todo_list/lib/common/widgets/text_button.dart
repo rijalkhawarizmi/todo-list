@@ -5,8 +5,8 @@ import '../../core/style/color_app.dart';
 
 class TextButtonWidget extends StatelessWidget {
   TextButtonWidget({super.key,required this.title,required this.onPress});
-  String title;
-  Function() onPress;
+  final String title;
+  final Function() onPress;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class TextButtonWidget extends StatelessWidget {
         child: CustomTextNunito(
             text: title,
             fontSize: 17,
-            fontWeight: FontWeight.w500,
-            color: ColorApp.black));
+            fontWeight: FontWeight.bold,
+            color: ColorApp.blue));
   }
 }
