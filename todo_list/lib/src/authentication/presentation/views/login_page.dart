@@ -29,94 +29,110 @@ class LoginPage extends StatelessWidget {
               color: ColorApp.black600),
           elevation: 1,
         ),
-        body: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 30, bottom: 10),
-                    child: CustomTextNunito(
-                      text: 'Email',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: ColorApp.black,
+        body: SingleChildScrollView(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 30, bottom: 10),
+                      child: CustomTextNunito(
+                        text: 'Email',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: ColorApp.black,
+                      ),
                     ),
-                  ),
-                  CustomTextRobotoField(
-                    controller: email,
-                    hintText: 'masukkan email/username  kamu',
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 30, bottom: 10),
-                    child: CustomTextNunito(
-                      text: 'Kata Sandi',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: ColorApp.black,
+                    CustomTextRobotoField(
+                      controller: email,
+                      hintText: 'masukkan email/username  kamu',
                     ),
-                  ),
-                  Builder(
-                    builder: (context) {
-                       final state=context.watch<AuthenticationBloc>().state;
+                    const Padding(
+                      padding: EdgeInsets.only(top: 30, bottom: 10),
+                      child: CustomTextNunito(
+                        text: 'Kata Sandi',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: ColorApp.black,
+                      ),
+                    ),
+                    Builder(builder: (context) {
+                      final state = context.watch<AuthenticationBloc>().state;
                       return CustomTextRobotoField(
-                        obscureText:  state is ObscurePassword ? state.obscurePass  ? false:true:true,
+                        obscureText: state is ObscurePassword
+                            ? state.obscurePass
+                                ? false
+                                : true
+                            : true,
                         controller: password,
                         hintText: 'masukkan kata sandi kamu',
                         suffixIcon: InkWell(
-                          onTap: () {
-                           state is ObscurePassword ? state.obscurePass  ?  context.read<AuthenticationBloc>().add(EventObscurePassword(obscurePassword: false)):context.read<AuthenticationBloc>().add(EventObscurePassword(obscurePassword: true)): context.read<AuthenticationBloc>().add(EventObscurePassword(obscurePassword: true));
-                          },
-                          child: state is ObscurePassword ? state.obscurePass  ? Icon(Icons.remove_red_eye):Icon(Icons.visibility_off_sharp):Icon(Icons.visibility_off_sharp)
-                        ),
+                            onTap: () {
+                              state is ObscurePassword
+                                  ? state.obscurePass
+                                      ? context.read<AuthenticationBloc>().add(
+                                          EventObscurePassword(
+                                              obscurePassword: false))
+                                      : context.read<AuthenticationBloc>().add(
+                                          EventObscurePassword(
+                                              obscurePassword: true))
+                                  : context.read<AuthenticationBloc>().add(
+                                      EventObscurePassword(
+                                          obscurePassword: true));
+                            },
+                            child: state is ObscurePassword
+                                ? state.obscurePass
+                                    ? Icon(Icons.remove_red_eye)
+                                    : Icon(Icons.visibility_off_sharp)
+                                : Icon(Icons.visibility_off_sharp)),
                       );
-                    }
-                  ),
-                ],
-              ),
-              const Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 30),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: CustomTextNunito(
-                      text: 'Lupa kata sandi?',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: ColorApp.red),
+                    }),
+                  ],
                 ),
-              ),
-              BlocConsumer<AuthenticationBloc, AuthenticationState>(
-                listener: (context, state) {
-                  if (state is AuthenticationSuccess) {
-                    context.goNamed(HomePage.homeRoute);
-                  } else if (state is AuthenticationError) {
-                    toastWidget(state.message);
-                  }
-                  // TODO: implement listener
-                },
-                builder: (context, state) {
-                  return CustomButton(
-                    onPressed: () {
-                      // if (email.text.isEmpty) {
-                      //   toastWidget('Masukkan Email');
-                      // } else if (password.text.isEmpty) {
-                      //   toastWidget('Masukkan Password');
-                      // } else {
-                        context.read<AuthenticationBloc>().add(
-                            EventAuthentication(
-                                email: "devmail@motoriz.co", password: "secret1234"));
-                      // }
-                    },
-                    borderRadius: 4,
-                    isLoading: state is AuthenticationLoading ? true : false,
-                    text: 'Masuk',
-                  );
-                },
-              ),
-             
-            ],
+                const Padding(
+                  padding: EdgeInsets.only(top: 10, bottom: 30),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: CustomTextNunito(
+                        text: 'Lupa kata sandi?',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: ColorApp.red),
+                  ),
+                ),
+                BlocConsumer<AuthenticationBloc, AuthenticationState>(
+                  listener: (context, state) {
+                    if (state is AuthenticationSuccess) {
+                      context.goNamed(HomePage.homeRoute);
+                    } else if (state is AuthenticationError) {
+                      toastWidget(state.message);
+                    }
+                    // TODO: implement listener
+                  },
+                  builder: (context, state) {
+                    return CustomButton(
+                      onPressed: () {
+                        if (email.text.isEmpty) {
+                          toastWidget('Masukkan Email');
+                        } else if (password.text.isEmpty) {
+                          toastWidget('Masukkan Password');
+                        } else {
+                          context.read<AuthenticationBloc>().add(
+                              EventAuthentication(
+                                  email: email.text, password: password.text));
+                        }
+                      },
+                      borderRadius: 4,
+                      isLoading: state is AuthenticationLoading ? true : false,
+                      text: 'Masuk',
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ));
   }

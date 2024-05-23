@@ -7,6 +7,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:todo_list/common/widgets/text_button.dart';
 import 'package:todo_list/common/widgets/custom_text.dart';
+import 'package:todo_list/core/utils/shared_storage.dart';
+import 'package:todo_list/src/authentication/presentation/views/login_page.dart';
 import 'package:todo_list/src/home/domain/entities/tasks_entity.dart';
 import 'package:todo_list/src/home/domain/usecases/update_tasks.dart';
 import 'package:todo_list/src/home/presentation/cubit/delete_tasks/delete_tasks_cubit.dart';
@@ -46,15 +48,12 @@ class _HomePageState extends State<HomePage> {
             fontWeight: FontWeight.bold,
             color: ColorApp.black),
       ),
-      appBar: AppBar(
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4.0),
-          child: Container(
-            color: ColorApp.grey100,
-            height: 2.3,
-          ),
-        ),
-      ),
+      appBar: AppBar(actions: [
+        IconButton(onPressed: (){
+          context.goNamed(LoginPage.loginRoute);
+          SharedStorage.removeAuth();
+        }, icon: const Icon(Icons.logout))
+      ],),
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
